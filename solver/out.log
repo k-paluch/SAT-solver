@@ -1,0 +1,36 @@
+commit f3c55beeb71e79a52e46488945438c0a9141cfa2
+Author: k-paluch <70886279+k-paluch@users.noreply.github.com>
+Date:   Mon Sep 7 11:34:18 2020 +0200
+
+    Delete test
+
+commit 2d0e27a25131d211990228222ea3e3375845aa6d
+Merge: 87e8432 493a838
+Author: k-paluch <k.paluch@student.vu.nl>
+Date:   Mon Sep 7 11:32:52 2020 +0200
+
+    Merge branch 'test' into master
+
+commit 493a838fa0324b88fccc199ba07f30acb12330b0
+Author: k-paluch <k.paluch@student.vu.nl>
+Date:   Mon Sep 7 11:30:08 2020 +0200
+
+    test
+
+commit 87e8432210dfbb673378fe2c3a93073f68d1967f
+Author: k-paluch <k.paluch@student.vu.nl>
+Date:   Mon Sep 7 11:24:50 2020 +0200
+
+    test
+
+commit 80479ce0b3021a3125bbae55b99e4b71df316540
+Author: k-paluch <k.paluch@student.vu.nl>
+Date:   Mon Sep 7 11:20:05 2020 +0200
+
+    sat.py init
+
+commit d9e77c8b83086c82411e3b9bdb5cbb010779de62
+Author: k-paluch <70886279+k-paluch@users.noreply.github.com>
+Date:   Mon Sep 7 10:37:44 2020 +0200
+
+    Initial commit
