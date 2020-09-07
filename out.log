@@ -1,3 +1,38 @@
+commit 879789f225c622f081f49c3633821b7cc43d3075
+Merge: 97b5b9a 970aab5
+Author: k-paluch <70886279+k-paluch@users.noreply.github.com>
+Date:   Mon Sep 7 13:53:52 2020 +0200
+
+    Merge pull request #1 from k-paluch/test
+    
+    Update README.md
+
+commit 970aab52132861b3d286b39c9a2e72791fbff666
+Author: k-paluch <70886279+k-paluch@users.noreply.github.com>
+Date:   Mon Sep 7 13:34:44 2020 +0200
+
+    Update README.md
+    
+    update README
+
+commit 97b5b9a303a2cfbb8ba7fe2e1e43d96d8c985979
+Author: k-paluch <k.paluch@student.vu.nl>
+Date:   Mon Sep 7 12:37:56 2020 +0200
+
+    r2g
+
+commit cbe4828f95fff2bcc2108f0f077484c1e23f0bf2
+Author: k-paluch <k.paluch@student.vu.nl>
+Date:   Mon Sep 7 12:08:02 2020 +0200
+
+    good to go
+
+commit fc493ecc1e1358a4430c66b59bf29f6c24206be9
+Author: k-paluch <k.paluch@student.vu.nl>
+Date:   Mon Sep 7 11:38:21 2020 +0200
+
+    ready to go
+
 commit f3c55beeb71e79a52e46488945438c0a9141cfa2
 Author: k-paluch <70886279+k-paluch@users.noreply.github.com>
 Date:   Mon Sep 7 11:34:18 2020 +0200
