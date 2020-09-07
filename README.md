@@ -1,2 +1,2 @@
-# sudoku
-SAT solver
+# SAT solver
+sudoku
