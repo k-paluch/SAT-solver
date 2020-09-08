@@ -1,7 +1,7 @@
 from pysat.formula import CNF
 from pprint import pprint
 
-values = []
+
 
 class node:
 	def __init__(self, left, right, values):
@@ -13,72 +13,48 @@ class node:
 		return self == other
 
 
-def output(values):
-	file = open('output/output.txt', 'w')
-	#111, 112
-	for output in values:
-		for n in values[output]:
-			if(n==True):
-				print(f'{n} 0\n')
-
-# def read_input(file):
-# 	file = open('sudoku_rules.txt', 'r')
-# 	lines = file.readlines()
-
-# 	q=0
-# 	for line in lines:
-# 		if(line == lines[0]):
-# 			tmp = line.split(sep=' ')
-# 			dimensions = tmp[2]
-# 			n_of_lines = tmp[3]
-
-# 		tmp = line.split(sep=' ')
-# 		clauses.append([])
-# 		for t in tmp:
-# 			if(i != 0):
-# 				clauses[len(clauses)].append(t)
-
-# 		if(q%((n*(n-1))/2)==0):
-# 			for i in tmp:
-# 				if(i != 0):
-# 					values.append(i:False)
-
-# 		elif(line == lines[0]):
-# 			pass
-# 		else:
-#   			q+=1
-
-# 	for index, clause in enumerate(clauses):
-# 		disjunction = or(clause)
-# 	conjuction = and(clauses)
+def init_values(clauses):
+	values = {}
+	for i in clauses:
+		if(len(i) > 2):
+			for x in i:
+				tmp = {x: False}
+				values.update(tmp)
+				if(x == clauses.nv):
+					return values
 
 def read_input(file):
-	f1 = CNF(from_file='input/sudoku-rules.txt')  # reading from file
-	l = dir(__builtins__)
-	pprint(vars(f1))
-	print(f1==True)
-	return f1
+	return CNF(from_file= file)
 
 
-def simplify_input(input):
-	if(value in CONSTANT):
-		pass
-	else:
-		# code
+# def simplify_clauses(input):
+# 	if(value in CONSTANT):
+# 		pass
+# 	else:
+# 		# code
+# 		pass
 
-	return result
+# 	pass
+# 	return result
+
+# def is_solved(clauses):
+# 	return clauses == True
 
 def solve(input: [], node_input):
-	
-	node = tree(None, None)
-	node_input.left = node
-	solve(input, node.left)
-	node_input.left = node
-	solve(input, node.right)
+	# if(not is_solved(node_input.values)):
+	tmp = node(None, None, values)
+	node_input.left = tmp
+	solve(input, tmp.left)
+	node_input.right = tmp
+	solve(input, tmp.right)
 
-return
+	return
 
 
-if '__name__' == '__main__':
-	root = tree(None, None)
 
+
+clauses = read_input('input/sudoku-rules.txt')
+values = init_values(clauses)
+root = node(None, None, values)
+# s_clauses = simplify_clauses(clauses)
+solve(clauses, root)
