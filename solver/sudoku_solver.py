@@ -7,7 +7,7 @@ class node:
 	def __init__(self, values):
 		self.right = None
 		self.left = None
-		self.values = None
+		self.values = values
 
 	def __eq__(self,other):
 		return self == other
