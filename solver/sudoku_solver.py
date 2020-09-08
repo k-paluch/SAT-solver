@@ -1,3 +1,6 @@
+from pysat.formula import CNF
+from pprint import pprint
+
 values = []
 
 class node:
@@ -18,36 +21,43 @@ def output(values):
 			if(n==True):
 				print(f'{n} 0\n')
 
+# def read_input(file):
+# 	file = open('sudoku_rules.txt', 'r')
+# 	lines = file.readlines()
+
+# 	q=0
+# 	for line in lines:
+# 		if(line == lines[0]):
+# 			tmp = line.split(sep=' ')
+# 			dimensions = tmp[2]
+# 			n_of_lines = tmp[3]
+
+# 		tmp = line.split(sep=' ')
+# 		clauses.append([])
+# 		for t in tmp:
+# 			if(i != 0):
+# 				clauses[len(clauses)].append(t)
+
+# 		if(q%((n*(n-1))/2)==0):
+# 			for i in tmp:
+# 				if(i != 0):
+# 					values.append(i:False)
+
+# 		elif(line == lines[0]):
+# 			pass
+# 		else:
+#   			q+=1
+
+# 	for index, clause in enumerate(clauses):
+# 		disjunction = or(clause)
+# 	conjuction = and(clauses)
+
 def read_input(file):
-	file = open('sudoku_rules.txt', 'r')
-	lines = file.readlines()
-
-	q=0
-	for line in lines:
-		if(line == lines[0]):
-			tmp = line.split(sep=' ')
-			dimensions = tmp[2]
-			n_of_lines = tmp[3]
-
-		tmp = line.split(sep=' ')
-		clauses.append([])
-		for t in tmp:
-			if(i != 0):
-				clauses[len(clauses)].append(t)
-
-		if(q%((n*(n-1))/2)==0):
-			for i in tmp:
-				if(i != 0):
-					values.append(i:False)
-
-		elif(line == lines[0]):
-			pass
-		else:
-  			q+=1
-
-	for index, clause in enumerate(clauses):
-		disjunction = or(clause)
-	conjuction = and(clauses)
+	f1 = CNF(from_file='input/sudoku-rules.txt')  # reading from file
+	l = dir(__builtins__)
+	pprint(vars(f1))
+	print(f1==True)
+	return f1
 
 
 def simplify_input(input):
