@@ -1,9 +1,14 @@
 values = []
 
 class node:
-	def __init__(self, left, right):
+	def __init__(self, left, right, values):
 		self.right = None
 		self.left = None
+		values = None
+
+	def __eq__(self,other):
+		return self == other
+
 
 def output(values):
 	file = open('output/output.txt', 'w')
