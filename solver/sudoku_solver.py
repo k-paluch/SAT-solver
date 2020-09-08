@@ -1,15 +1,3 @@
-read_input [and(
-		[or(0,1,2,3)],
-		[],
-		[])
-	]
-
-clauses[[]]
-
-# def sudoku_init(n):
-# 	if(n==999):
-# 		return [[0 for n in range(10)] for i in range(10)]
-
 values = []
 
 class node:
