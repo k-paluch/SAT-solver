@@ -26,8 +26,12 @@ def init_values(clauses):
 def read_input(file):
 	return CNF(from_file= file)
 
+def read_DIMACS_sudoku(file):
+	pass
 
-# def simplify_clauses(input):
+
+def simplify_clauses(input):
+	pass
 # 	if(value in CONSTANT):
 # 		pass
 # 	else:
@@ -37,8 +41,12 @@ def read_input(file):
 # 	pass
 # 	return result
 
-# def is_solved(clauses):
+def is_solved(clauses):
+	pass
 # 	return clauses == True
+
+def move_possible:
+	pass
 
 def solve(input: [], node_input):
 	# if(not is_solved(node_input.values)):
