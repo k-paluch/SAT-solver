@@ -4,10 +4,10 @@ from pprint import pprint
 
 
 class node:
-	def __init__(self, left, right, values):
+	def __init__(self, values):
 		self.right = None
 		self.left = None
-		values = None
+		self.values = None
 
 	def __eq__(self,other):
 		return self == other
@@ -42,19 +42,23 @@ def read_input(file):
 
 def solve(input: [], node_input):
 	# if(not is_solved(node_input.values)):
-	tmp = node(None, None, values)
-	node_input.left = tmp
-	solve(input, tmp.left)
-	node_input.right = tmp
-	solve(input, tmp.right)
+	node_input.left = node(values)
+	solve(input, node_input.left)
+	node_input.right = node(values)
+	solve(input, node_input.right)
 
 	return
 
-
-
+def output(values):
+	f = open("demofile3.txt", "w")
+	for x in values:
+		for i in values[x]:
+			if(i==True):
+				f.write(f"{x} 0\n")
+	f.close()
 
 clauses = read_input('input/sudoku-rules.txt')
 values = init_values(clauses)
-root = node(None, None, values)
+root = node(values)
 # s_clauses = simplify_clauses(clauses)
 solve(clauses, root)
