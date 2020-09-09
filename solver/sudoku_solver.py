@@ -1,6 +1,4 @@
 from pysat.formula import CNF
-from pprint import pprint
-
 
 
 class node:
@@ -17,9 +15,10 @@ def init_values(clauses):
 	values = {}
 	for i in clauses:
 		if(len(i) > 2):
+			tmp = int(str(i[0])[:-1])
+			values.update({tmp:{}})
 			for x in i:
-				tmp = {x: False}
-				values.update(tmp)
+				values[tmp].update({x: False})
 				if(x == clauses.nv):
 					return values
 
@@ -27,7 +26,7 @@ def read_input(file):
 	return CNF(from_file= file)
 
 def read_DIMACS_sudoku(file):
-	pass
+	return CNF(from_file= file)
 
 
 def simplify_clauses(input):
@@ -41,24 +40,43 @@ def simplify_clauses(input):
 # 	pass
 # 	return result
 
-def is_solved(clauses):
-	pass
-# 	return clauses == True
+def to_bool(clauses, values, constants):
+	tmp = []
+	for variable in constants:
+		values[int(str(variable[0])[:-1])][variable[0]] = True
 
-def move_possible:
-	pass
+	for index, clause in enumerate(clauses):
+		tmp.append([])
+		for literal in clause:
+			if(str(literal).startswith('-')):
+				tmp[index].append(not values[int(str(literal)[1:-1])][int(str(literal)[1:])])
+			else:
+				tmp[index].append(values[int(str(literal)[:-1])][literal])
 
-def solve(input: [], node_input):
-	# if(not is_solved(node_input.values)):
-	node_input.left = node(values)
-	solve(input, node_input.left)
-	node_input.right = node(values)
-	solve(input, node_input.right)
+	return tmp,values
+
+def is_satisfied(clauses):
+	for x in clauses:
+		if(True in x):
+			continue
+		else:
+			return False
+	return True
+
+
+def solve(clauses, node_input):
+	for x in node_input.values:
+		for i in node_input.values[x]:
+			node_input.left = node(node_input.values)
+			solve(input, node_input.left)
+			node_input.values[x][i] = not node_input.values[x][i]
+			node_input.right = node(values)
+			solve(input, node_input.right)
 
 	return
 
 def output(values):
-	f = open("demofile3.txt", "w")
+	f = open("output.txt", "w")
 	for x in values:
 		for i in values[x]:
 			if(i==True):
@@ -66,7 +84,9 @@ def output(values):
 	f.close()
 
 clauses = read_input('input/sudoku-rules.txt')
+sudoku = read_input('input/sudoku-example.txt')
 values = init_values(clauses)
-root = node(values)
+tmp = to_bool(clauses.clauses, values, sudoku.clauses)
 # s_clauses = simplify_clauses(clauses)
-solve(clauses, root)
+print(is_satisfied(tmp))
+output(values)
