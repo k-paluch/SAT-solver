@@ -83,10 +83,12 @@ def output(values):
 				f.write(f"{x} 0\n")
 	f.close()
 
-clauses = read_input('input/sudoku-rules.txt')
-sudoku = read_input('input/sudoku-example.txt')
-values = init_values(clauses)
-tmp = to_bool(clauses.clauses, values, sudoku.clauses)
-# s_clauses = simplify_clauses(clauses)
-print(is_satisfied(tmp))
-output(values)
+
+if __name__ == "__main__":
+	clauses = read_input('input/sudoku-rules.txt')
+	sudoku = read_input('input/sudoku-example.txt')
+	values = init_values(clauses)
+	tmp = to_bool(clauses.clauses, values, sudoku.clauses)
+	# s_clauses = simplify_clauses(clauses)
+	print(is_satisfied(tmp))
+	output(values)
