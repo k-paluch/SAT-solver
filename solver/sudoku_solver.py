@@ -79,8 +79,8 @@ def output(values):
 	f = open("output.txt", "w")
 	for x in values:
 		for i in values[x]:
-			if(i==True):
-				f.write(f"{x} 0\n")
+			if(values[x][i]==True):
+				f.write(f"{i} 0\n")
 	f.close()
 
 
