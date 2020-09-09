@@ -10,7 +10,8 @@ class node:
 	def __eq__(self,other):
 		return self == other
 
-
+#initialize False values to every variable 2D hashmap - 1D is 11-99(no. of cell) and 2D variable(eg. 111-999)
+# structure of cell 11 {11:{111,112...,119}}
 def init_values(clauses):
 	values = {}
 	for i in clauses:
@@ -22,9 +23,11 @@ def init_values(clauses):
 				if(x == clauses.nv):
 					return values
 
+#read rules
 def read_input(file):
 	return CNF(from_file= file)
 
+#read constants
 def read_DIMACS_sudoku(file):
 	return CNF(from_file= file)
 
@@ -40,6 +43,7 @@ def simplify_clauses(input):
 # 	pass
 # 	return result
 
+#return array of True/False values based on clauses in combination with values from the hashmap 'values'
 def to_bool(clauses, values, constants):
 	tmp = []
 	for variable in constants:
@@ -55,40 +59,43 @@ def to_bool(clauses, values, constants):
 
 	return tmp,values
 
+# check satisfiability - AND and OR statement
 def is_satisfied(clauses):
-	for x in clauses:
-		if(True in x):
+	for clause in clauses:
+		if(True in clause):
 			continue
 		else:
 			return False
 	return True
 
-
+#solve sudoku
 def solve(clauses, node_input):
-	for x in node_input.values:
-		for i in node_input.values[x]:
+	for value in node_input.values:
+		for variable in node_input.values[value]:
 			node_input.left = node(node_input.values)
 			solve(input, node_input.left)
-			node_input.values[x][i] = not node_input.values[x][i]
+			node_input.values[value][variable] = not node_input.values[value][variable]
 			node_input.right = node(values)
 			solve(input, node_input.right)
 
 	return
 
+#generate output file
 def output(values):
 	f = open("output.txt", "w")
-	for x in values:
-		for i in values[x]:
-			if(values[x][i]==True):
-				f.write(f"{i} 0\n")
+	for value in values:
+		for variable in values[value]:
+			if(values[value][variable]==True):
+				f.write(f"{variable} 0\n")
 	f.close()
 
 
 if __name__ == "__main__":
 	clauses = read_input('input/sudoku-rules.txt')
-	sudoku = read_input('input/sudoku-example.txt')
+	constants = read_input('input/sudoku-example.txt')
 	values = init_values(clauses)
-	tmp = to_bool(clauses.clauses, values, sudoku.clauses)
+	tmp = to_bool(clauses.clauses, values, constants.clauses)
+	print(tmp[0])
 	# s_clauses = simplify_clauses(clauses)
 	print(is_satisfied(tmp))
 	output(values)
