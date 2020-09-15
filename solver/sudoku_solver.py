@@ -2,27 +2,15 @@ from pysat.formula import CNF
 import time
 
 class node:
-	def __init__(self, values,clauses):
+	def __init__(self, literals, clauses):
 		self.right = None
 		self.left = None
-		self.values = values
+		self.literals = values
 		self.clauses = clauses
+		self.result = []
 
 	def __eq__(self,other):
 		return self == other
-
-# #initialize False values to every variable 2D hashmap - 1D is 11-99(no. of cell) and 2D variable(eg. 111-999)
-# # structure of cell 11 {11:[False, False,]] - 1-9 [0-8]}
-# def init_values(clauses):
-# 	values = {}
-# 	for i in clauses:
-# 		if(len(i) > 2):
-# 			tmp = int(str(i[0])[:-1])
-# 			values.update({tmp:{}})
-# 			for x in i:
-# 				values[tmp].update({x: 0})
-# 				if(x == clauses.nv):
-# 					return values
 
 #read rules
 def read_input(file):
@@ -31,25 +19,6 @@ def read_input(file):
 #read constants
 def read_DIMACS_sudoku(file):
 	return CNF(from_file= file)
-
-
-
-
-# #return array of True/False values based on clauses in combination with values from the hashmap 'values'
-# def to_bool(clauses, values, constants):
-# 	tmp = []
-# 	for variable in constants:
-# 		values[int(str(variable[0])[:-1])][variable[0]] = True
-
-# 	for index, clause in enumerate(clauses):
-# 		tmp.append([])
-# 		for literal in clause:
-# 			if(str(literal).startswith('-')):
-# 				tmp[index].append(not values[int(str(literal)[1:-1])][int(str(literal)[1:])])
-# 			else:
-# 				tmp[index].append(values[int(str(literal)[:-1])][literal])
-
-# 	return tmp,values
 
 # check satisfiability - AND and OR statement
 def is_satisfied(clauses):
@@ -60,55 +29,99 @@ def is_satisfied(clauses):
 			return False
 	return True
 
-solution_found = False
+
 #solve sudoku
 def solve(node_input):
-	for value in node_input.values:
-		for variable in node_input.values[value]:
-			if(is_satisfied(node_input.clauses)==False or solution_found == False):
+	for literal in node_input.literals:
+			l = adjust_literals(literals)
+			clauses = simplify_clauses_true(node_input.clauses,literal)
+			node_input.left = node(l,clauses)
+			node_input.left.result.append(literal)
+			solve(node_input.left)
 
-				node_input.values[value][variable] = True
-				simplify_clauses(node_input.clauses)
-				node_input.left = node(node_input.values,clauses)
-				solve(input, node_input.left)
+			clauses = simplify_clauses_false(node_input.clauses,literal, False)
+			node_input.right = node(l,clauses)
+			solve(input, node_input.right)
 
-				node_input.values[value][variable] = False
-				simplify_clauses(node_input.clauses)
-				node_input.right = node(node_input.values,clauses)
-				solve(input, node_input.right)
-			else:
-				salution_found = True
-				return
+	return 'not satisfied'
 
-	return
+def adjust_literals(literals, literal,value):
+	if(value == False):
+		literals.pop(literals.index(literal))
+	if(value):
+		cell = int(str(literal)[0:2]+'1')
+		cell_values = range(cell,cell+9)
+		for x in literals:
+			if x in cell_values:
+				literals.pop(literals.index(x))
+
+def get_literals(clauses):
+	literals = []
+
+	for clause in clauses:
+		for literal in clause:
+			if (not str(literal).startswith('-')) and (literal not in literals):
+				literals.append(literal)
+	return literals
 
 #generate output file
-def output(values):
+def output(result):
 	f = open("output.txt", "w")
-	for value in values:
-		for variable in values[value]:
-			if(values[value][variable]==True):
-				f.write(f"{variable} 0\n")
+	for literal in result:
+		f.write(f"{literal} 0\n")
 	f.close()
 
-def simplify_clauses(clauses, literal):
+# if last literal in big clause -> dont pop the clause -> add to solution instead
+
+def simplify_clauses_true(clauses, literal):
 	tmp = clauses
-	print(literal)
+	negation = int('-' + str(literal))
+	cell = int(str(literal)[0:2]+'1')
+	for clause in reversed(range(len(tmp))):
+		if(literal in tmp[clause]):
+			tmp.pop(clause)
+		if (negation in tmp[clause]):
+			if len(tmp[clause]) != 1:
+				tmp[clause].pop(tmp[clause].index(negation))
+			else:
+				return 'not satisfied'
+			# make it run :D
+
+	cell_values = range(cell,cell+9)
+	for value in cell_values:
+		simplify_clauses_false(clauses,value,True)
+
+	return tmp
+
+def simplify_clauses_false(clauses,literal, clause_value):
+	tmp = clauses
 	negation = int('-' + str(literal))
 	for clause in reversed(range(len(tmp))):
-		if(literal in tmp[clause]) or (negation in tmp[clause]):
+		if(literal in tmp[clause]):
+			if (len(tmp[clause]) != 1 or clause_value == True):
+				tmp[clause].pop(tmp[clause].index(literal))
+			else:
+				return 'not satisfied'
+		if (negation in tmp[clause]):
 			tmp.pop(clause)
-
 	return tmp
 
 if __name__ == "__main__":
 	solution_found = False
 	clauses = read_input('input/sudoku-rules.txt').clauses
-	constants = read_input('input/sudoku-example.txt').clauses
-	print(constants)
-	for constant in constants:
-		clauses = simplify_clauses(clauses, constant[0])
-	# root = node(values, clauses)
-	# solve(root)
-	# output(values)
+	constants = read_input('sudoku.txt').clauses
+	print(get_literals(clauses))
 
+
+	for constant in constants:
+		clauses = simplify_clauses_true(clauses, constant[0])
+		if(clauses=='not satisfied'):
+			break
+
+	print(clauses)
+
+# either we end up with an ATOM -> satisfied 
+# or 
+# literal' and literal -> unsatisfied
+
+# if after pop of non negated literal -> empty clause THEN unsatisfied end
