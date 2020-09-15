@@ -67,10 +67,45 @@ def simplify_clauses(clauses, literal):
 
 	return tmp
 
+def sudoku9x9():
+    list_place = list(range(11,100))
+    unwanted_num = {20, 30, 40, 50, 60, 70, 80, 90} 
+    list_place = [cor for cor in list_place if cor not in unwanted_num]
+    return list_place
+
+def sudoku4x4():
+    list_place = list(range(11,15)) + list(range(21,25)) + list(range(31,35)) + list(range(41,45))
+    return list_place
+
+def sudoku16x16():
+    return
+
+def read_sudokus():
+    sudoku_lines = [line.rstrip() for line in open('input/16x16.txt')]
+    list_place = 0
+    if len(sudoku_lines[0]) == 81:
+        list_place = sudoku9x9()
+    elif len(sudoku_lines[0]) == 16:
+        list_place = sudoku4x4()
+    elif len(sudoku_lines[0]) == 256:
+        list_place = sudoku16x16()
+    
+   
+    test = []
+    for lines in sudoku_lines:
+        givens=[]
+        for i in range(len(lines)):
+            if lines[i] != '.':
+                givens.append(str(list_place[i])+str(lines[i]) +' 0')
+        
+        test.append(givens)
+    return test
+
 if __name__ == "__main__":
-	solution_found = False
-	clauses = read_input('input/sudoku-rules.txt').clauses
-	constants = read_input('input/sudoku-example.txt').clauses
-	print(constants)
-	for constant in constants:
-		clauses = simplify_clauses(clauses, constant[0])
+    solution_found = False
+    clauses = read_input('input/sudoku-rules.txt').clauses
+    constants = read_input('input/sudoku-example.txt').clauses
+    sudokus = read_sudokus()
+	#print(constants)
+	#for constant in constants:
+	#	clauses = simplify_clauses(clauses, constant[0])
