@@ -1,6 +1,8 @@
 from pysat.formula import CNF
 import time
 
+true_values = []
+
 class node:
 	def __init__(self, literals, clauses):
 		self.right = None
@@ -19,16 +21,6 @@ def read_input(file):
 #read constants
 def read_DIMACS_sudoku(file):
 	return CNF(from_file= file)
-
-# check satisfiability - AND and OR statement
-def is_satisfied(clauses):
-	for clause in clauses:
-		if(True in clause):
-			continue
-		else:
-			return False
-	return True
-
 
 #solve sudoku
 def solve(node_input):
@@ -55,6 +47,8 @@ def adjust_literals(literals, literal,value):
 			if x in cell_values:
 				literals.pop(literals.index(x))
 
+
+
 def get_literals(clauses):
 	literals = []
 
@@ -73,6 +67,23 @@ def output(result):
 
 # if last literal in big clause -> dont pop the clause -> add to solution instead
 
+def check_single_literal_clauses(clauses):
+	tmp = clauses
+
+	single_literal_closes = []
+
+	for clause in reversed(range(len(tmp))):
+		if len(tmp[clause]) == 1 and tmp[clause][0]<0:
+			single_literal_closes.append(int(str(tmp[clause][0])[1:]))
+
+	for literal in single_literal_closes:
+		simplify_clauses_false(clauses,literal,False)
+
+	if(len(tmp[0])==0):
+		return 'not satisfied'
+	return tmp
+
+
 def simplify_clauses_true(clauses, literal):
 	tmp = clauses
 	negation = int('-' + str(literal))
@@ -80,18 +91,25 @@ def simplify_clauses_true(clauses, literal):
 	for clause in reversed(range(len(tmp))):
 		if(literal in tmp[clause]):
 			tmp.pop(clause)
-		if (negation in tmp[clause]):
-			if len(tmp[clause]) != 1:
-				tmp[clause].pop(tmp[clause].index(negation))
-			else:
-				return 'not satisfied'
+		if(len(tmp)>clause):
+			if (negation in tmp[clause]):
+				if len(tmp[clause]) != 1:
+					tmp[clause].pop(tmp[clause].index(negation))
+				else:
+					return 'not satisfied'
+
+		if(len(tmp)==0):
+			return 'satisfied'
+
+
 			# make it run :D
 
 	cell_values = range(cell,cell+9)
 	for value in cell_values:
 		simplify_clauses_false(clauses,value,True)
 
-	return tmp
+
+	return check_single_literal_clauses(tmp)
 
 def simplify_clauses_false(clauses,literal, clause_value):
 	tmp = clauses
@@ -100,28 +118,25 @@ def simplify_clauses_false(clauses,literal, clause_value):
 		if(literal in tmp[clause]):
 			if (len(tmp[clause]) != 1 or clause_value == True):
 				tmp[clause].pop(tmp[clause].index(literal))
-			else:
+			if(len(tmp[clause])==1):
 				return 'not satisfied'
 		if (negation in tmp[clause]):
 			tmp.pop(clause)
+	
 	return tmp
 
 if __name__ == "__main__":
 	solution_found = False
 	clauses = read_input('input/sudoku-rules.txt').clauses
 	constants = read_input('sudoku.txt').clauses
-	print(get_literals(clauses))
+	literals = get_literals(clauses)
 
 
 	for constant in constants:
+		true_values.append(constant[0])
 		clauses = simplify_clauses_true(clauses, constant[0])
 		if(clauses=='not satisfied'):
 			break
-
+	
 	print(clauses)
-
-# either we end up with an ATOM -> satisfied 
-# or 
-# literal' and literal -> unsatisfied
-
-# if after pop of non negated literal -> empty clause THEN unsatisfied end
+	print(true_values)
