@@ -67,39 +67,78 @@ def simplify_clauses(clauses, literal):
 
 	return tmp
 
-def sudoku9x9():
+def sudoku9x9(lines):
     list_place = list(range(11,100))
     unwanted_num = {20, 30, 40, 50, 60, 70, 80, 90} 
     list_place = [cor for cor in list_place if cor not in unwanted_num]
-    return list_place
-
-def sudoku4x4():
-    list_place = list(range(11,15)) + list(range(21,25)) + list(range(31,35)) + list(range(41,45))
-    return list_place
-
-def sudoku16x16():
-    return
-
-def read_sudokus():
-    sudoku_lines = [line.rstrip() for line in open('input/16x16.txt')]
-    list_place = 0
-    if len(sudoku_lines[0]) == 81:
-        list_place = sudoku9x9()
-    elif len(sudoku_lines[0]) == 16:
-        list_place = sudoku4x4()
-    elif len(sudoku_lines[0]) == 256:
-        list_place = sudoku16x16()
     
-   
     test = []
-    for lines in sudoku_lines:
+    for line in lines:
         givens=[]
-        for i in range(len(lines)):
-            if lines[i] != '.':
-                givens.append(str(list_place[i])+str(lines[i]) +' 0')
+        for i in range(len(line)):
+            if line[i] != '.':
+                givens.append(str(list_place[i])+str(line[i]) +' 0')
         
         test.append(givens)
     return test
+
+def sudoku4x4(lines):
+    list_place = list(range(11,15)) + list(range(21,25)) + list(range(31,35)) + list(range(41,45))
+    test = []
+    for line in lines:
+        givens=[]
+        for i in range(len(line)):
+            if line[i] != '.':
+                givens.append(str(list_place[i])+str(line[i]) +' 0')
+        
+        test.append(givens)
+    return test
+
+def sudoku16x16(lines):
+    given=[]
+    for line in lines:
+        test=[]
+
+        for i in range(len(line)):
+            test.append(str(line[i]))
+        test = [item.replace("A", "10") for item in test]
+        test = [item.replace("B", "11") for item in test]
+        test = [item.replace("C", "12") for item in test]
+        test = [item.replace("D", "13") for item in test]
+        test = [item.replace("E", "14") for item in test]
+        test = [item.replace("F", "15") for item in test]
+        test = [item.replace("G", "16") for item in test]
+        given.append(test)
+    
+    cordinates=[]
+    for cor in given:
+        test=[]
+        row = 1
+        col = 1
+        for i in range(len(cor)):
+            if col <= 16 and cor[i] != '.':
+                   test.append(int(cor[i]) + 17*col + 17*17*row)
+            col += 1
+            if col > 16:
+                col =1 
+                row +=1
+            
+        cordinates.append(test)
+    return cordinates
+
+
+def read_sudokus():
+    sudoku_lines = [line.rstrip() for line in open('input/16x16.txt')]
+    sudoku_list = 0
+    if len(sudoku_lines[0]) == 81:
+        sudoku_list = sudoku9x9(sudoku_lines)
+    elif len(sudoku_lines[0]) == 16:
+        sudoku_list = sudoku4x4(sudoku_lines)
+    elif len(sudoku_lines[0]) == 256:
+        sudoku_list = sudoku16x16(sudoku_lines)
+    
+    
+    return sudoku_list
 
 if __name__ == "__main__":
     solution_found = False
