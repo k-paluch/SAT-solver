@@ -1,4 +1,16 @@
 from pysat.formula import CNF
+import time
+class node:
+	def __init__(self, literals, clauses):
+		self.right = None
+		self.left = None
+		self.literals = literals
+		self.clauses = clauses
+
+	def __eq__(self,other):
+		return self == other
+
+
 
 true_values = []
 
@@ -15,29 +27,44 @@ def read_DIMACS_sudoku(file):
 
 #solve sudoku
 def solve(node_input):
-	for literal in node_input.literals:
-			l = adjust_literals(literals)
-			clauses = simplify_clauses_true(node_input.clauses,literal)
-			node_input.left = node(l,clauses)
-			node_input.left.result.append(literal)
-			solve(node_input.left)
+	data = [node_input.clauses, node_input.literals]
+	literal = node_input.literals[0]
 
-			clauses = simplify_clauses_false(node_input.clauses,literal, False)
-			node_input.right = node(l,clauses)
-			solve(input, node_input.right)
+	sat = simplify_clauses_true(data[0],literal, data[1])
+	if(sat == 'satisfied'):
+		print('satisfied')
+		print(true_values)
+		exit()
+	print(f'true {literal}')
+	node_input.left = node(sat[1],sat[0])
+	if(sat!='not satisfied'):
+		true_values.append(literal)
+		solve(node_input.left)
 
-	return 'not satisfied'
+	sat = simplify_clauses_false(data[0],literal, data[1], False)
+	node_input.right = node(sat[1],sat[0])
+	if(sat!='not satisfied'):
+		if(literal in true_values):
+			true_values.pop(true_values.index(literal))
+		print(f'false {literal}')
+		solve(node_input.right)
+	
+	return
 
 # adjust list of literals
 def adjust_literals(literals, literal,value):
-	if(value == False):
-		literals.pop(literals.index(literal))
-	if(value):
+	tmp = literals
+	if(value == False and literal in tmp):
+		tmp.pop(tmp.index(literal))
+		print(f"popping {literal}")
+	if(value == True and literal in tmp):
 		cell = int(str(literal)[0:2]+'1')
 		cell_values = range(cell,cell+9)
-		for x in literals:
-			if x in cell_values:
-				literals.pop(literals.index(x))
+		for x in cell_values:
+			if x in tmp:
+				tmp.pop(tmp.index(x))
+				print(f'popped {x}')
+	return tmp
 
 
 # get literals from ruleset
@@ -58,23 +85,30 @@ def output(result):
 	f.close()
 
 # look up clauses with single literal in it and adjust clauses accordingly
-def check_single_literal_clauses(clauses):
-	tmp = clauses
-
+def check_single_literal_clauses(clauses, literals):
+	tmp =(clauses,literals)
 	single_literals = []
+	for clause in reversed(range(len(tmp[0]))):
+		if(tmp[0]!='not satisfied'):
+			if len(tmp[0][clause]) == 1 and tmp[0][clause][0]<0:
+				single_literals.append(int(str(tmp[0][clause][0])[1:]))
 
-	for clause in reversed(range(len(tmp))):
-		if len(tmp[clause]) == 1 and tmp[clause][0]<0:
-			single_literals.append(int(str(tmp[clause][0])[1:]))
-
+	
 	for literal in single_literals:
-		tmp = simplify_clauses_false(tmp,literal,False)
+		if(tmp=='not satisfied'):
+			return tmp
+		if(literal in tmp[1]):
+			tmp[1].pop(tmp[1].index(literal))
+			tmp = simplify_clauses_false(tmp[0],literal,tmp[1],False)
 
 	
 	return tmp
 
 # simplify function to set literal to True
-def simplify_clauses_true(clauses, literal):
+def simplify_clauses_true(clauses, literal, literals):
+	tmp_literals = literals
+	if(literal in tmp_literals):
+		tmp_literals.pop(tmp_literals.index(literal))
 	tmp = clauses
 	negation = int('-' + str(literal))
 	cell = int(str(literal)[0:2]+'1')
@@ -89,19 +123,24 @@ def simplify_clauses_true(clauses, literal):
 					return 'not satisfied'
 
 	if(len(tmp)==0):
-		return 'satisfied', true_values
+		print('satisfied')
+		exit()
 
+	
 	cell_values = range(cell,cell+9)
+	tmp = (tmp,tmp_literals)
 	for value in cell_values:
-		tmp = simplify_clauses_false(tmp,value,True)
-
-	return check_single_literal_clauses(tmp)
+		tmp = simplify_clauses_false(tmp[0],value, tmp[1] ,True)
+	return check_single_literal_clauses(tmp[0], tmp[1])
 
 # adjust clauses and set literal to False
 # clause_value -> 
 # 				True -> setting a literal to True and therefore whole clause is True -> can get rid of whole clause -> called only from simplify_clauses_true()
 # 				False -> when setting a literal to False and we cannot delete whole clause -> if we do -> return unsatisfied
-def simplify_clauses_false(clauses,literal, clause_value):
+def simplify_clauses_false(clauses,literal, literals , clause_value):
+	tmp_literals = literals
+	if(literal in tmp_literals):
+		tmp_literals.pop(tmp_literals.index(literal))
 	tmp = clauses
 	negation = int('-' + str(literal))
 	for clause in reversed(range(len(tmp))):
@@ -112,11 +151,9 @@ def simplify_clauses_false(clauses,literal, clause_value):
 				return 'not satisfied'
 		if (negation in tmp[clause]):
 			tmp.pop(clause)
-	
 		if(len(tmp[0])==0):
-			print('not satisfied')
-			exit()
-	return tmp
+			return 'not satisfied'
+	return tmp, tmp_literals
 
 
 def sudoku9x9(lines):
