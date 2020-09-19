@@ -121,7 +121,8 @@ def simplify_clauses_true(clauses, literal, literals):
 		if(len(tmp)>clause):
 			if (negation in tmp[clause]):
 				if len(tmp[clause]) != 1:
-					tmp[clause].pop(tmp[clause].index(negation))
+					index = int(tmp[clause].index(negation))
+					tmp[clause].pop(index)
 				else:
 					return 'not satisfied', tmp_literals
 	if(len(tmp)==0):
@@ -133,7 +134,8 @@ def simplify_clauses_true(clauses, literal, literals):
 	cell_values = range(cell,cell+9)
 	tmp = (tmp,tmp_literals)
 	for value in cell_values:
-		tmp = simplify_clauses_false(tmp[0],value, tmp[1] ,True)
+		if value != literal:
+			tmp = simplify_clauses_false(tmp[0],value, tmp[1] ,True)
 	return tmp[0], tmp[1]
 
 # adjust clauses and set literal to False
@@ -148,7 +150,8 @@ def simplify_clauses_false(clauses,literal, literals , clause_value):
 	for clause in reversed(range(len(tmp))):
 		if(literal in tmp[clause]):
 			if (len(tmp[clause]) != 1 or clause_value == True):
-				tmp[clause].pop(tmp[clause].index(literal))
+				index = int(tmp[clause].index(literal))
+				tmp[clause].pop(index)
 			elif(len(tmp[clause])==1):
 				return 'not satisfied', tmp_literals
 		if (negation in tmp[clause]):

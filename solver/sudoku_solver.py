@@ -8,7 +8,13 @@ if __name__ == "__main__":
 	literals = functions.get_literals(clauses)
 	start = timeit.default_timer()
 	data = (clauses, literals)
-	
+
+	#remove constants from literals
+	for constant in constants:
+		for literalindex in reversed(range(len(literals))):
+			if str(literals[literalindex])[0:-1] == str(constant[0])[:-1]:
+				literals.remove(literals[literalindex])
+
 	for constant in constants[55]:
 		true_values.append(constant)
 		data = functions.simplify_clauses_true(data[0], constant, data[1])
