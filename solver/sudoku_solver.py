@@ -10,9 +10,9 @@ if __name__ == "__main__":
 	data = (clauses, literals)
 
 	#remove constants from literals
-	for constant in constants:
+	for constant in constants[55]:
 		for literalindex in reversed(range(len(literals))):
-			if str(literals[literalindex])[0:-1] == str(constant[0])[:-1]:
+			if str(literals[literalindex])[:-1] == str(constant)[:-1]:
 				literals.remove(literals[literalindex])
 
 	for constant in constants[55]:
