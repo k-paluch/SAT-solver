@@ -23,10 +23,6 @@ def init_true_values():
 def read_input(file):
 	return CNF(from_file= file)
 
-#read constants
-def read_DIMACS_sudoku(file):
-	return CNF(from_file= file)
-
 #solve sudoku
 def solve(node_input):
 	if(node_input.clauses=='not satisfied'):
@@ -42,22 +38,19 @@ def solve(node_input):
 			return
 
 	literal = node_input.literals[0]
-
 	copy_data = copy.deepcopy(data)
 
 	sat = simplify_clauses_true(copy_data[0],literal,copy_data[1])
-	if(sat[0]!='not satisfied'):
-		node_input.left = node(sat[1],sat[0])
-		true_values.append(literal)
-		solve(node_input.left)
+	node_input.left = node(sat[1],sat[0])
+	true_values.append(literal)
+	solve(node_input.left)
 	
 
 	sat = simplify_clauses_false(data[0],literal,data[1], False)
-	if(sat[0]!='not satisfied'):
-		node_input.right = node(sat[1],sat[0])
-		if(literal in true_values):
-			true_values.pop(true_values.index(literal))
-		solve(node_input.right)
+	node_input.right = node(sat[1],sat[0])
+	if(literal in true_values):
+		true_values.pop(true_values.index(literal))
+	solve(node_input.right)
 
 	return true_values
 
@@ -111,7 +104,7 @@ def get_literals(clauses):
 	literals = []
 	for clause in clauses:
 		for literal in clause:
-			if (not str(literal).startswith('-')) and (literal not in literals):
+			if (literal > 0) and (literal not in literals):
 				literals.append(literal)
 	return literals
 
@@ -124,8 +117,7 @@ def output(result):
 
 # look up clauses with single literal in it and adjust clauses accordingly
 def check_single_literal_clauses(clauses, literals):
-	tmp_literals = literals
-	tmp =(clauses,tmp_literals)
+	tmp =(clauses,literals)
 	single_literals = []
 
 	for clause in reversed(range(len(tmp[0]))):
@@ -140,86 +132,70 @@ def check_single_literal_clauses(clauses, literals):
 			tmp[1].pop(tmp[1].index(literal))
 			tmp = simplify_clauses_false(tmp[0],literal,tmp[1],False)
 
-	return tmp, tmp_literals
+	return tmp
 
 # simplify function to set literal to True
 def simplify_clauses_true(clauses, literal, literals):
-	tmp_literals = literals
-	if(literal in tmp_literals):
-		if(tmp_literals == 'satisfied' or tmp_literals == 'not satisfied'):
+	if(literal in literals):
+		if(literals == 'satisfied' or literals == 'not satisfied'):
 			print(true_values)
 			exit()
-		tmp_literals.pop(tmp_literals.index(literal))
-	tmp = clauses
-	negation = int('-' + str(literal))
+		literals.pop(literals.index(literal))
 
 	cell = int(str(literal)[0:2]+'1')
-	for clause in reversed(range(len(tmp))):
-		if(tmp == 'not satisfied'):
-			return 'not satisfied', tmp_literals
-		if(literal in tmp[clause]):
-			tmp.pop(clause)
-		if(len(tmp)>clause):
-			if (negation in tmp[clause]):
-				if len(tmp[clause]) != 1:
-					index = int(tmp[clause].index(negation))
-					tmp[clause].pop(index)
+	for clause in reversed(range(len(clauses))):
+		if(clauses == 'not satisfied'):
+			return 'not satisfied', literals
+		if(literal in clauses[clause]):
+			clauses.pop(clause)
+		if(len(clauses)>clause):
+			if (-literal  in clauses[clause]):
+				if len(clauses[clause]) != 1:
+					index = int(clauses[clause].index(-literal ))
+					clauses[clause].pop(index)
 				else:
-					return 'not satisfied', tmp_literals
-	if(len(tmp)==0):
+					return 'not satisfied', literals
+	if(len(clauses)==0):
 		print('satisfied')
 		true_values.append(literal)
 		print(true_values)
 		stop = timeit.default_timer()
 		print('Runtime: ', stop - start) 
+		print(len(true_values))
 		exit()
-
 	
-		
-	cell_values = range(cell,cell+9)
-	tmp = (tmp,tmp_literals)
-	for value in cell_values:
-		if value != literal:
-			if(tmp == 'satisfied'):
-				print('satisfied')
-				true_values.append(literal)
-				print(true_values)
-				exit()
-			tmp = simplify_clauses_false(tmp[0],value, tmp[1] ,True)
-	return tmp[0], tmp[1]
+	literals = heur3(clauses)
+	return check_single_literal_clauses(clauses, literals)
 
 # adjust clauses and set literal to False
 # clause_value -> 
 # 				True -> setting a literal to True and therefore whole clause is True -> can get rid of whole clause -> called only from simplify_clauses_true()
 # 				False -> when setting a literal to False and we cannot delete whole clause -> if we do -> return unsatisfied
 def simplify_clauses_false(clauses,literal, literals , clause_value):
-	tmp_literals = literals
-	tmp_literals = adjust_literals(tmp_literals, literal, False)
-	tmp = clauses
-	negation = int('-' + str(literal))
-	if(tmp == 'not satisfied'):
-		return 'not satisfied', tmp_literals
-	for clause in reversed(range(len(tmp))):
-		if(literal in tmp[clause]):
-			if (len(tmp[clause]) != 1 or clause_value == True):
-				index = int(tmp[clause].index(literal))
-				tmp[clause].pop(index)
-			elif(len(tmp[clause])==1):
-				return 'not satisfied', tmp_literals
-		if (negation in tmp[clause]):
-			tmp.pop(clause)
+	literals = adjust_literals(literals, literal, False)
+	if(clauses == 'not satisfied'):
+		return 'not satisfied', literals
+	for clause in reversed(range(len(clauses))):
+		if(literal in clauses[clause]):
+			if (len(clauses[clause]) != 1 or clause_value == True):
+				index = int(clauses[clause].index(literal))
+				clauses[clause].pop(index)
+			elif(len(clauses[clause])==1):
+				return 'not satisfied', literals
+		if (-literal in clauses[clause]):
+			clauses.pop(clause)
 
-		if(len(tmp)==0):
+		if(len(clauses)==0):
 			return 'satisfied'
 			exit()
-		if(len(tmp[0])==0):
-			return 'not satisfied', tmp_literals
-	return tmp, tmp_literals
+		if(len(clauses[0])==0):
+			return 'not satisfied', literals
+	return check_single_literal_clauses(clauses, literals)
 
 
 def sudoku9x9(lines):
     list_place = list(range(11,100))
-    unwanted_num = {20, 30, 40, 50, 60, 70, 80, 90} 
+    unwanted_num = {20, 30, 40, 50, 60, 70, 80, 90}
     list_place = [cor for cor in list_place if cor not in unwanted_num]
     
     test = []
