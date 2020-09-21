@@ -1,5 +1,8 @@
 from pysat.formula import CNF
 import time
+import copy
+import random
+import timeit
 class node:
 	def __init__(self, literals, clauses):
 		self.right = None
@@ -12,7 +15,7 @@ class node:
 
 
 true_values = []
-
+start = timeit.default_timer()
 def init_true_values():
 	return true_values
 
@@ -27,7 +30,6 @@ def read_DIMACS_sudoku(file):
 #solve sudoku
 def solve(node_input):
 	if(node_input.clauses=='not satisfied'):
-		print('not satisfied')
 		return
 	c = node_input.clauses
 	l = node_input.literals
@@ -40,19 +42,55 @@ def solve(node_input):
 			return
 
 	literal = node_input.literals[0]
-	sat = simplify_clauses_true(data[0],literal,data[1])
-	print(f'true {literal}')
-	node_input.left = node(sat[1],sat[0])
-	true_values.append(literal)
-	solve(node_input.left)
 
+	copy_data = copy.deepcopy(data)
+
+	sat = simplify_clauses_true(copy_data[0],literal,copy_data[1])
+	if(sat[0]!='not satisfied'):
+		node_input.left = node(sat[1],sat[0])
+		true_values.append(literal)
+		solve(node_input.left)
 	
+
 	sat = simplify_clauses_false(data[0],literal,data[1], False)
-	true_values.pop(true_values.index(literal))
-	node_input.right = node(sat[1],sat[0])
-	print(f'false {literal}')
-	solve(node_input.right)
+	if(sat[0]!='not satisfied'):
+		node_input.right = node(sat[1],sat[0])
+		if(literal in true_values):
+			true_values.pop(true_values.index(literal))
+		solve(node_input.right)
+
 	return true_values
+
+
+def heur1(literal, clauses):
+	i =0
+	for clause in clauses:
+		if literal in clause or -literal in clause:
+			i+=1
+
+	return {literal: i}
+
+def heur2(literals):
+	return random.sample(literals, len(literals))
+
+def heur3(clauses):
+	# [111,112,113]
+	heur3 = [[],[],[],[],[],[],[],[],[]]
+	for clause in clauses:
+		if(clause[0]>0):
+			for x in clause:
+				if(x not in heur3[len(clause)-1]):
+					heur3[len(clause)-1].append(x)
+
+	result = []
+	for x in heur3:
+		for y in x:
+			if(y not in result):
+				result.append(y)
+
+
+	return result
+
 
 # adjust list of literals
 def adjust_literals(literals, literal, value):
@@ -108,6 +146,9 @@ def check_single_literal_clauses(clauses, literals):
 def simplify_clauses_true(clauses, literal, literals):
 	tmp_literals = literals
 	if(literal in tmp_literals):
+		if(tmp_literals == 'satisfied' or tmp_literals == 'not satisfied'):
+			print(true_values)
+			exit()
 		tmp_literals.pop(tmp_literals.index(literal))
 	tmp = clauses
 	negation = int('-' + str(literal))
@@ -127,6 +168,10 @@ def simplify_clauses_true(clauses, literal, literals):
 					return 'not satisfied', tmp_literals
 	if(len(tmp)==0):
 		print('satisfied')
+		true_values.append(literal)
+		print(true_values)
+		stop = timeit.default_timer()
+		print('Runtime: ', stop - start) 
 		exit()
 
 	
@@ -135,6 +180,11 @@ def simplify_clauses_true(clauses, literal, literals):
 	tmp = (tmp,tmp_literals)
 	for value in cell_values:
 		if value != literal:
+			if(tmp == 'satisfied'):
+				print('satisfied')
+				true_values.append(literal)
+				print(true_values)
+				exit()
 			tmp = simplify_clauses_false(tmp[0],value, tmp[1] ,True)
 	return tmp[0], tmp[1]
 
@@ -147,6 +197,8 @@ def simplify_clauses_false(clauses,literal, literals , clause_value):
 	tmp_literals = adjust_literals(tmp_literals, literal, False)
 	tmp = clauses
 	negation = int('-' + str(literal))
+	if(tmp == 'not satisfied'):
+		return 'not satisfied', tmp_literals
 	for clause in reversed(range(len(tmp))):
 		if(literal in tmp[clause]):
 			if (len(tmp[clause]) != 1 or clause_value == True):
