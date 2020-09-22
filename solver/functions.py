@@ -1,8 +1,8 @@
 from pysat.formula import CNF
-import time
-import copy
-import random
-import timeit
+from copy import deepcopy
+from timeit import default_timer
+from random import sample
+
 class node:
 	def __init__(self, literals, clauses):
 		self.right = None
@@ -10,13 +10,10 @@ class node:
 		self.literals = literals
 		self.clauses = clauses
 
-	def __eq__(self,other):
-		return self == other
-
-
 true_values = []
-start = timeit.default_timer()
-def init_true_values():
+start = default_timer()
+
+def init_result():
 	return true_values
 
 #read rules
@@ -27,9 +24,9 @@ def read_input(file):
 def solve(node_input):
 	if(node_input.clauses=='not satisfied'):
 		return
-	c = node_input.clauses
-	l = node_input.literals
-	data = [c, l]
+
+	data = [node_input.clauses, node_input.literals]
+
 	if(len(node_input.literals)==0):
 		if(len(node_input.clauses)==0):
 			print('satisfied')
@@ -38,7 +35,7 @@ def solve(node_input):
 			return
 
 	literal = node_input.literals[0]
-	copy_data = copy.deepcopy(data)
+	copy_data = deepcopy(data)
 
 	sat = simplify_clauses_true(copy_data[0],literal,copy_data[1])
 	node_input.left = node(sat[1],sat[0])
@@ -48,64 +45,75 @@ def solve(node_input):
 
 	sat = simplify_clauses_false(data[0],literal,data[1], False)
 	node_input.right = node(sat[1],sat[0])
-	if(literal in true_values):
-		true_values.pop(true_values.index(literal))
+	true_values.pop(true_values.index(literal))
 	solve(node_input.right)
 
 	return true_values
 
 
-def heur1(literal, clauses):
-	i =0
-	for clause in clauses:
-		if literal in clause or -literal in clause:
-			i+=1
+def heur1(literals, clauses):
+	tmp = {}
+	for literal in literals:
+		i =0
+		for clause in clauses:
+			if literal in clause or -literal in clause:
+				i+=1
+		if(i!=0):
+			tmp.update({literal: i})
 
-	return {literal: i}
+	tmp = sorted(tmp.items(), key=lambda kv: kv[1], reverse = True)
+	result =[]
+
+	for t in tmp:
+		result.append(t[0])
+
+	return result
 
 def heur2(literals):
-	return random.sample(literals, len(literals))
+	return sample(literals, len(literals))
 
 def heur3(clauses):
-	# [111,112,113]
-	heur3 = [[],[],[],[],[],[],[],[],[]]
+	heur3 = [[] for x in range(16)]
+
 	for clause in clauses:
 		if(clause[0]>0):
-			for x in clause:
-				if(x not in heur3[len(clause)-1]):
-					heur3[len(clause)-1].append(x)
+			for literal in clause:
+				if(literal not in heur3[len(clause)-1]):
+					heur3[len(clause)-1].append(literal)
 
 	result = []
-	for x in heur3:
-		for y in x:
-			if(y not in result):
-				result.append(y)
-
+	for clause in heur3:
+		for literal in clause:
+			if(literal not in result):
+				result.append(literal)
 
 	return result
 
 
 # adjust list of literals
 def adjust_literals(literals, literal, value):
-	tmp = literals
-	if(value == False and literal in tmp):
-		tmp.pop(tmp.index(literal))
-	if(value == True and literal in tmp):
-		cell = int(str(literal)[0:2]+'1')
+	if(value == False and literal in literals):
+		literals.pop(literals.index(literal))
+
+	if(value == True and literal in literals):
+		cell  = literal - (literal%10)
 		cell_values = range(cell,cell+9)
 		for x in cell_values:
-			if x in tmp:
-				tmp.pop(tmp.index(x))
-	return tmp
+			if x in literals:
+				literals.pop(literals.index(x))
+
+	return literals
 
 
 # get literals from ruleset
 def get_literals(clauses):
 	literals = []
+
 	for clause in clauses:
 		for literal in clause:
 			if (literal > 0) and (literal not in literals):
 				literals.append(literal)
+
 	return literals
 
 #generate output file
@@ -137,17 +145,15 @@ def check_single_literal_clauses(clauses, literals):
 # simplify function to set literal to True
 def simplify_clauses_true(clauses, literal, literals):
 	if(literal in literals):
-		if(literals == 'satisfied' or literals == 'not satisfied'):
-			print(true_values)
-			exit()
 		literals.pop(literals.index(literal))
 
-	cell = int(str(literal)[0:2]+'1')
 	for clause in reversed(range(len(clauses))):
 		if(clauses == 'not satisfied'):
 			return 'not satisfied', literals
+
 		if(literal in clauses[clause]):
 			clauses.pop(clause)
+
 		if(len(clauses)>clause):
 			if (-literal  in clauses[clause]):
 				if len(clauses[clause]) != 1:
@@ -155,17 +161,15 @@ def simplify_clauses_true(clauses, literal, literals):
 					clauses[clause].pop(index)
 				else:
 					return 'not satisfied', literals
+
 	if(len(clauses)==0):
+		print('Runtime: ', default_timer() - start)
 		print('satisfied')
 		true_values.append(literal)
-		print(true_values)
-		stop = timeit.default_timer()
-		print('Runtime: ', stop - start) 
-		print(len(true_values))
+		output(sorted(true_values))
 		exit()
-	
-	literals = heur3(clauses)
-	return check_single_literal_clauses(clauses, literals)
+
+	return check_single_literal_clauses(clauses, heur3(clauses))
 
 # adjust clauses and set literal to False
 # clause_value -> 
@@ -185,11 +189,9 @@ def simplify_clauses_false(clauses,literal, literals , clause_value):
 		if (-literal in clauses[clause]):
 			clauses.pop(clause)
 
-		if(len(clauses)==0):
-			return 'satisfied'
-			exit()
 		if(len(clauses[0])==0):
 			return 'not satisfied', literals
+
 	return check_single_literal_clauses(clauses, literals)
 
 
@@ -216,12 +218,13 @@ def sudoku4x4(lines):
         for i in range(len(line)):
             if line[i] != '.':
                 givens.append(int(str(list_place[i])+str(line[i])))
-        
         test.append(givens)
+
     return test
 
 def sudoku16x16(lines):
     given=[]
+    
     for line in lines:
         test=[]
 
@@ -239,16 +242,11 @@ def sudoku16x16(lines):
     cordinates=[]
     for cor in given:
         test=[]
-        row = 1
-        col = 1
+        v = 306
         for i in range(len(cor)):
-            if col <= 16 and cor[i] != '.':
-                   test.append(int(str(col) + str(row) + str(cor[i])))
-            col += 1
-            if col > 16:
-                col =1 
-                row +=1
-            
+            if cor[i] != '.':
+            	test.append(v+int(cor[i]))
+            v+=17
         cordinates.append(test)
     return cordinates
 
@@ -262,6 +260,5 @@ def read_sudokus(file):
         sudoku_list = sudoku4x4(sudoku_lines)
     elif len(sudoku_lines[0]) == 256:
         sudoku_list = sudoku16x16(sudoku_lines)
-    
     
     return sudoku_list
