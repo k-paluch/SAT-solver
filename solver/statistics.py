@@ -9,6 +9,6 @@ types = ["4x4", "9x9", "16x16"]
 heurs = ["0","1","2","3"]
 
 for t in types:
-	# for h in heurs:
-	for x in range(10):
-		c= subprocess.call(["python", "sudoku_solver.py", "-heur", '3', "-type", t])
+	for h in heurs:
+		for x in range(10):
+			c= subprocess.call(["python", "sudoku_solver.py", "-heur", h, "-type", t])
