@@ -1,7 +1,0 @@
-from pysat.formula import CNF
-from pprint import pprint
-f1 = CNF(from_file='sudoku-rules.txt')  # reading from file
-
-l = dir(__builtins__)
-pprint(vars(f1))
-print(f1==True)

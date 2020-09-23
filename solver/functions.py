@@ -2,6 +2,10 @@ from pysat.formula import CNF
 from copy import deepcopy
 from timeit import default_timer
 from random import sample
+import csv
+import sudoku_solver
+from random import randint
+
 
 class node:
 	def __init__(self, literals, clauses):
@@ -12,6 +16,11 @@ class node:
 
 true_values = []
 start = default_timer()
+depth = 0
+max_depth = depth
+backtracks = 0
+n_of_constants =0
+n_of_literals = []
 
 def init_result():
 	return true_values
@@ -22,6 +31,9 @@ def read_input(file):
 
 #solve sudoku
 def solve(node_input):
+	global backtracks, depth, max_depth, n_of_literals
+	n_of_literals.append(len(node_input.literals))
+	# print(f'{len(node_input.literals)} in depth of {depth} at backtrack no. {backtracks}')
 	if(node_input.clauses=='not satisfied'):
 		return
 
@@ -32,15 +44,21 @@ def solve(node_input):
 			print('satisfied')
 			exit()
 		else:
+			depth-=1
+			backtracks+=1
 			return
 
 	literal = node_input.literals[0]
 	copy_data = deepcopy(data)
 
+	depth+=1
+	if(depth > max_depth):
+		max_depth = depth
 	sat = simplify_clauses_true(copy_data[0],literal,copy_data[1])
 	node_input.left = node(sat[1],sat[0])
 	true_values.append(literal)
 	solve(node_input.left)
+
 	
 
 	sat = simplify_clauses_false(data[0],literal,data[1], False)
@@ -48,8 +66,10 @@ def solve(node_input):
 	true_values.pop(true_values.index(literal))
 	solve(node_input.right)
 
-	return true_values
-
+	depth-=1
+	backtracks+=1
+	
+	return
 
 def heur1(literals, clauses):
 	tmp = {}
@@ -117,11 +137,17 @@ def get_literals(clauses):
 	return literals
 
 #generate output file
-def output(result):
-	f = open("output.txt", "w")
-	for literal in result:
+def output(true_values , backtracks, max_depth, runtime):
+	global n_of_constants, n_of_literals
+	f = open("output.txt", 'a')
+	for literal in true_values:
 		f.write(f"{literal} 0\n")
 	f.close()
+
+
+	with open('statistics.csv', mode='a', newline='') as statistics:
+		statistics = csv.writer(statistics, delimiter=',')
+		statistics.writerow([sudoku_solver.argc.type, sudoku_solver.argc.heuristic , n_of_constants, n_of_literals , true_values, backtracks, max_depth, runtime])
 
 # look up clauses with single literal in it and adjust clauses accordingly
 def check_single_literal_clauses(clauses, literals):
@@ -164,12 +190,18 @@ def simplify_clauses_true(clauses, literal, literals):
 
 	if(len(clauses)==0):
 		print('Runtime: ', default_timer() - start)
+		print(f'n. of backtracks is {backtracks}')
 		print('satisfied')
 		true_values.append(literal)
-		output(sorted(true_values))
+		output(true_values , backtracks, max_depth, default_timer() - start)
+		print(len(true_values))
 		exit()
 
-	return check_single_literal_clauses(clauses, heur3(clauses))
+	if(sudoku_solver.argc.heuristic == 3):
+		literals = heur3(clauses)
+	elif(sudoku_solver.argc.heuristic == 1):
+		literals = heur1(literals, clauses)
+	return check_single_literal_clauses(clauses, literals)
 
 # adjust clauses and set literal to False
 # clause_value -> 
@@ -252,13 +284,17 @@ def sudoku16x16(lines):
 
 
 def read_sudokus(file):
-    sudoku_lines = [line.rstrip() for line in open(file)]
-    sudoku_list = 0
-    if len(sudoku_lines[0]) == 81:
-        sudoku_list = sudoku9x9(sudoku_lines)
-    elif len(sudoku_lines[0]) == 16:
-        sudoku_list = sudoku4x4(sudoku_lines)
-    elif len(sudoku_lines[0]) == 256:
-        sudoku_list = sudoku16x16(sudoku_lines)
-    
-    return sudoku_list
+	global n_of_constants
+	sudoku_lines = [line.rstrip() for line in open(file)]
+	sudoku_list = 0
+	if len(sudoku_lines[0]) == 81:
+ 		sudoku_list = sudoku9x9(sudoku_lines)
+	elif len(sudoku_lines[0]) == 16:
+		sudoku_list = sudoku4x4(sudoku_lines)
+	elif len(sudoku_lines[0]) == 256:
+		sudoku_list = sudoku16x16(sudoku_lines)
+
+	t = randint(0,len(sudoku_list)-1)
+
+	n_of_constants = len(sudoku_list[t])
+	return sudoku_list[t]
