@@ -22,6 +22,7 @@ backtracks = 0
 n_of_constants =0
 n_of_literals = []
 
+
 def init_result():
 	return true_values
 
@@ -152,8 +153,8 @@ def output(true_values , backtracks, max_depth, runtime):
 		f.write(f"{literal} 0\n")
 	f.close()
 
-
-	with open('statistics.csv', mode='a', newline='') as statistics:
+	print(sudoku_solver.argc.heuristic)
+	with open(f'statistics{sudoku_solver.argc.heuristic}.csv', mode='a', newline='') as statistics:
 		statistics = csv.writer(statistics, delimiter=',')
 		statistics.writerow([sudoku_solver.argc.type, sudoku_solver.argc.heuristic , n_of_constants, n_of_literals , true_values, backtracks, max_depth, runtime])
 

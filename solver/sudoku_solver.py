@@ -5,11 +5,10 @@ import argparse
 
 parser = argparse.ArgumentParser(description='choose heuristic')
 
-parser.add_argument('-heur', '--heuristic', help='heuristic', type = int, default=3)
-parser.add_argument('-type', '--type', help='type of sudoku', type = str, default='16x16')
+parser.add_argument('-heur', '--heuristic', help='heuristic', type = int, default=1)
+parser.add_argument('-type', '--type', help='type of sudoku', type = str, default='9x9')
 
 argc = parser.parse_args()
-
 
 if __name__ == "__main__":
 	true_values = functions.init_result()
