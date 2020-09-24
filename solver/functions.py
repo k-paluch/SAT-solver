@@ -3,7 +3,7 @@ from copy import deepcopy
 from timeit import default_timer
 from random import sample
 import csv
-import sudoku_solver
+import SAT
 from random import randint
 
 
@@ -116,8 +116,7 @@ def adjust_literals(literals, literal, value):
 		literals.pop(literals.index(literal))
 
 	if(value == True and literal in literals):
-		print(sudoku_solver.argc.type)
-		if(sudoku_solver.argc.type == '16x16'):
+		if(SAT.argc.data == '16'):
 			cell = (literal - 307) - ((literal - 307)%17)
 			cell_values = range(cell,cell+17)
 			for x in cell_values:
@@ -148,15 +147,22 @@ def get_literals(clauses):
 #generate output file
 def output(true_values , backtracks, max_depth, runtime):
 	global n_of_constants, n_of_literals
-	f = open("output.txt", 'a')
+	f = open("output.txt", 'w')
 	for literal in true_values:
 		f.write(f"{literal} 0\n")
 	f.close()
 
-	print(sudoku_solver.argc.heuristic)
-	with open(f'statistics{sudoku_solver.argc.heuristic}.csv', mode='a', newline='') as statistics:
+	if(SAT.argc.heur1):
+		heuristic = 'h1'
+	elif(SAT.argc.heur2):
+		heuristic = 'h2'
+	elif(SAT.argc.heur3):
+		heuristic = 'h3'
+	else:
+		heuristic = 'h4'
+	with open(f'statistics{SAT.argc.data}.csv', mode='a', newline='') as statistics:
 		statistics = csv.writer(statistics, delimiter=',')
-		statistics.writerow([sudoku_solver.argc.type, sudoku_solver.argc.heuristic , n_of_constants, n_of_literals , true_values, backtracks, max_depth, runtime])
+		statistics.writerow([SAT.argc.data, heuristic , n_of_constants, n_of_literals , true_values, backtracks, max_depth, runtime])
 
 # look up clauses with single literal in it and adjust clauses accordingly
 def check_single_literal_clauses(clauses, literals):
@@ -207,9 +213,9 @@ def simplify_clauses_true(clauses, literal, literals):
 		print(len(true_values))
 		exit()
 
-	if(sudoku_solver.argc.heuristic == 3):
+	if(SAT.argc.heur4):
 		literals = heur3(clauses)
-	elif(sudoku_solver.argc.heuristic == 1):
+	elif(SAT.argc.heur2):
 		literals = heur1(literals, clauses)
 	
 	return check_single_literal_clauses(clauses, literals)

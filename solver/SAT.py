@@ -5,15 +5,21 @@ import argparse
 
 parser = argparse.ArgumentParser(description='choose heuristic')
 
-parser.add_argument('-heur', '--heuristic', help='heuristic', type = int, default=1)
-parser.add_argument('-type', '--type', help='type of sudoku', type = str, default='9x9')
+parser.add_argument('-S1', '--heur1', help='heur1', action = "store_true")
+parser.add_argument('-S2', '--heur2', help='heur1', action = "store_true")
+parser.add_argument('-S3', '--heur3', help='heur1', action = "store_true")
+parser.add_argument('-S4', '--heur4', help='heur1', action = "store_true")
+parser.add_argument('data', type=str, help='heuristic')
+
+# parser.add_argument('data', type=str, help="path to data")
 
 argc = parser.parse_args()
 
+
 if __name__ == "__main__":
 	true_values = functions.init_result()
-	clauses = functions.read_input(f'input/{argc.type}_rules.txt').clauses
-	constants = functions.read_sudokus(f'input/{argc.type}.txt')
+	clauses = functions.read_input(f'{argc.data}/rules.txt').clauses
+	constants = functions.read_sudokus(f'{argc.data}/sudoku.txt')
 	literals = functions.get_literals(clauses)
 	
 	data = (clauses, literals)
@@ -27,11 +33,11 @@ if __name__ == "__main__":
 
 	#pick heuristic
 	# argc.heuristic = 3
-	if(argc.heuristic == 1):
+	if(argc.heur2):
 		literals = functions.heur1(literals,clauses)
-	elif(argc.heuristic == 2):
+	elif(argc.heur3):
 		literals = functions.heur2(literals)
-	elif(argc.heuristic == 3):
+	elif(argc.heur4):
 		literals = functions.heur3(clauses)
 
 	#define root of a tree and start recursive function
