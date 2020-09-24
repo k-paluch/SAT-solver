@@ -5,8 +5,8 @@ import argparse
 
 parser = argparse.ArgumentParser(description='choose heuristic')
 
-parser.add_argument('-heur', '--heuristic', help='heuristic', type = int, default=0)
-parser.add_argument('-type', '--type', help='type of sudoku', type = str, default='9x9')
+parser.add_argument('-heur', '--heuristic', help='heuristic', type = int, default=3)
+parser.add_argument('-type', '--type', help='type of sudoku', type = str, default='16x16')
 
 argc = parser.parse_args()
 
@@ -22,14 +22,8 @@ if __name__ == "__main__":
 
 	#pick random sudoku and remove constants from literals
 	for constant in constants:
-		# for index in reversed(range(len(literals))):
-		# 	for literal in literals:
-		# 		literals = functions.adjust_literals(literals, literal, True)
-		# 		print(literals)
 		true_values.append(constant)
 		data = functions.simplify_clauses_true(data[0], constant, data[1])
-
-
 	print(f'{len(constants)}, {constants}')
 
 	#pick heuristic

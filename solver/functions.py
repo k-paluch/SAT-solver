@@ -38,7 +38,6 @@ def solve(node_input):
 		return
 
 	data = [node_input.clauses, node_input.literals]
-
 	if(len(node_input.literals)==0):
 		if(len(node_input.clauses)==0):
 			print('satisfied')
@@ -54,12 +53,12 @@ def solve(node_input):
 	depth+=1
 	if(depth > max_depth):
 		max_depth = depth
+
 	sat = simplify_clauses_true(copy_data[0],literal,copy_data[1])
 	node_input.left = node(sat[1],sat[0])
 	true_values.append(literal)
 	solve(node_input.left)
 
-	
 	sat = simplify_clauses_false(data[0],literal,data[1], False)
 	node_input.right = node(sat[1],sat[0])
 	true_values.pop(true_values.index(literal))
@@ -81,7 +80,7 @@ def heur1(literals, clauses):
 		if(i!=0):
 			tmp.update({literal: i})
 
-	tmp = sorted(tmp.items(), key=lambda kv: kv[1], reverse = True)
+	tmp = sorted(tmp.items(), key=lambda kv: kv[1])
 	result =[]
 
 	for t in tmp:
@@ -116,8 +115,17 @@ def adjust_literals(literals, literal, value):
 		literals.pop(literals.index(literal))
 
 	if(value == True and literal in literals):
-		cell  = literal - (literal%10)
-		cell_values = range(cell,cell+9)
+		print(sudoku_solver.argc.type)
+		if(sudoku_solver.argc.type == '16x16'):
+			cell = (literal - 307) - ((literal - 307)%17)
+			cell_values = range(cell,cell+17)
+			for x in cell_values:
+				print(x)
+
+			exit()
+		else:
+			cell  = literal - (literal%10)
+			cell_values = range(cell,cell+9)
 		for x in cell_values:
 			if x in literals:
 				literals.pop(literals.index(x))
@@ -202,6 +210,7 @@ def simplify_clauses_true(clauses, literal, literals):
 		literals = heur3(clauses)
 	elif(sudoku_solver.argc.heuristic == 1):
 		literals = heur1(literals, clauses)
+	
 	return check_single_literal_clauses(clauses, literals)
 
 # adjust clauses and set literal to False
@@ -280,6 +289,9 @@ def sudoku16x16(lines):
             if cor[i] != '.':
             	test.append(v+int(cor[i]))
             v+=17
+            if(v%289)==0:
+            	v+=17
+
         cordinates.append(test)
     return cordinates
 
