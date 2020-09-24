@@ -8,7 +8,6 @@ parser = argparse.ArgumentParser(description='choose heuristic')
 parser.add_argument('-S1', '--heur1', help='heur1', action = "store_true")
 parser.add_argument('-S2', '--heur2', help='heur1', action = "store_true")
 parser.add_argument('-S3', '--heur3', help='heur1', action = "store_true")
-parser.add_argument('-S4', '--heur4', help='heur1', action = "store_true")
 parser.add_argument('data', type=str, help='heuristic')
 
 # parser.add_argument('data', type=str, help="path to data")
@@ -36,9 +35,7 @@ if __name__ == "__main__":
 	if(argc.heur2):
 		literals = functions.heur1(literals,clauses)
 	elif(argc.heur3):
-		literals = functions.heur2(literals)
-	elif(argc.heur4):
-		literals = functions.heur3(clauses)
+		literals = functions.heur2(clauses)
 
 	#define root of a tree and start recursive function
 	root = functions.node(literals, clauses)

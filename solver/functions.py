@@ -89,20 +89,18 @@ def heur1(literals, clauses):
 
 	return result
 
-def heur2(literals):
-	return sample(literals, len(literals))
 
-def heur3(clauses):
-	heur3 = [[] for x in range(16)]
+def heur2(clauses):
+	heur2 = [[] for x in range(16)]
 
 	for clause in clauses:
 		if(clause[0]>0):
 			for literal in clause:
-				if(literal not in heur3[len(clause)-1]):
-					heur3[len(clause)-1].append(literal)
+				if(literal not in heur2[len(clause)-1]):
+					heur2[len(clause)-1].append(literal)
 
 	result = []
-	for clause in heur3:
+	for clause in heur2:
 		for literal in clause:
 			if(literal not in result):
 				result.append(literal)
@@ -156,10 +154,8 @@ def output(true_values , backtracks, max_depth, runtime):
 		heuristic = 'h1'
 	elif(SAT.argc.heur2):
 		heuristic = 'h2'
-	elif(SAT.argc.heur3):
-		heuristic = 'h3'
 	else:
-		heuristic = 'h4'
+		heuristic = 'h3'
 	with open(f'statistics{SAT.argc.data}.csv', mode='a', newline='') as statistics:
 		statistics = csv.writer(statistics, delimiter=',')
 		statistics.writerow([SAT.argc.data, heuristic , n_of_constants, n_of_literals , true_values, backtracks, max_depth, runtime])
@@ -213,8 +209,8 @@ def simplify_clauses_true(clauses, literal, literals):
 		print(len(true_values))
 		exit()
 
-	if(SAT.argc.heur4):
-		literals = heur3(clauses)
+	if(SAT.argc.heur3):
+		literals = heur2(clauses)
 	elif(SAT.argc.heur2):
 		literals = heur1(literals, clauses)
 	
