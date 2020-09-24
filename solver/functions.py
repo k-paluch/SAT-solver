@@ -60,7 +60,6 @@ def solve(node_input):
 	solve(node_input.left)
 
 	
-
 	sat = simplify_clauses_false(data[0],literal,data[1], False)
 	node_input.right = node(sat[1],sat[0])
 	true_values.pop(true_values.index(literal))
@@ -69,6 +68,7 @@ def solve(node_input):
 	depth-=1
 	backtracks+=1
 	
+
 	return
 
 def heur1(literals, clauses):
@@ -151,6 +151,7 @@ def output(true_values , backtracks, max_depth, runtime):
 
 # look up clauses with single literal in it and adjust clauses accordingly
 def check_single_literal_clauses(clauses, literals):
+	
 	tmp =(clauses,literals)
 	single_literals = []
 
